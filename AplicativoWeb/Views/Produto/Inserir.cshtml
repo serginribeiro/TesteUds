@@ -1,0 +1,156 @@
+﻿@model AplicativoWeb.Models.Produto
+
+@{
+    ViewBag.Title = "Inserir";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Inserir</h2>
+
+@using (Html.BeginForm("InserirProduto", null, FormMethod.Post, htmlAttributes: new { @id = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Produto</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Codigo, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Codigo, new { htmlAttributes = new { @id = "codigo", @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Codigo, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Nome, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Nome, new { htmlAttributes = new { @id = "nome", @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PrecoUnitario, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.PrecoUnitario, new { htmlAttributes = new { @id = "precoUnitario", @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.PrecoUnitario, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="button" value="Salvar" class="btn btn-default" onclick="Salvar()" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Voltar a Listagem", "Index")
+</div>
+
+
+<script type="text/javascript">
+    function Salvar() {
+        if (!VerificarCodigoJaUtilizado()) {
+            $("#codigo").focus();
+            return;
+        }
+        if (!VerificarNomeJaUtilizado()) {
+            $("#nome").focus();
+            return;
+        }
+        if (!VerificarPreenchimento())
+            return;
+        if (!VerificarPrecoMaiorQueZero())
+            return;
+        if (!ValidarSePrecoDeUnitarioSomenteNumeros()) {
+            return;
+        }
+
+       // var precoUnitario = parseFloat($("#precoUnitario").val());
+        //$("#precoUnitario").val(precoUnitario);
+        $("#form").submit();
+    }
+
+    function VerificarNomeJaUtilizado() {
+        var retorno = true;
+        $.ajax({
+            type: "GET",
+            url: "BuscarProdutoDuplicadoPorNome",
+            cache: false,
+            async: false,
+            data: { nome: $("#nome").val() },
+            success: function (data) {
+                if (data === "True") {
+                    alert("Campo nome ja utilizado em outro produto");
+                    retorno = false;
+                }
+            }
+        });
+
+        return retorno;
+    }
+
+    function VerificarCodigoJaUtilizado() {
+        url = "BuscarProdutoDuplicadoPorCodigo";
+        var parametro = { codigo: $("#codigo").val() };
+        var retorno = true;
+        $.ajax({
+            type: "GET",
+            url: url,
+            cache: false,
+            async: false,
+            data: parametro,
+            success: function (data) {
+                if (data === "True") {
+                    alert("Campo código ja utilizado em outro produto");
+                    retorno = false;
+                }
+            }
+        });
+
+        return retorno;
+    }
+
+    function VerificarPreenchimento() {
+        if ($("#codigo").val().trim() == "") {
+            alert("Campo código não preenchido");
+            $("#codigo").focus();
+            return false;
+        }
+        if ($("#nome").val().trim() == "") {
+            alert("Campo nome não preenchido");
+            $("#nome").focus();
+            return false;
+        }
+        if ($("#precoUnitario").val().trim() == "") {
+            alert("Campo preço unitário não preenchido");
+            $("#precoUnitario").focus();
+            return false;
+        }
+        return true;
+    }
+
+    function VerificarPrecoMaiorQueZero() {
+        var valorUnitario = $("#precoUnitario").val();
+        if (valorUnitario <= 0) {
+            alert("Campo preço unitário deve ser maior que zero");
+            $("#precoUnitario").focus();
+            return false;
+        }
+        return true;
+    }
+
+    function ValidarSePrecoDeUnitarioSomenteNumeros() {
+        //var valor = $("#precoUnitario").val().replace(",", ".");
+
+        //if (/^(\-|\+)?([0-9]+(\.[0-9]+)?|Infinity)$/.test(valor))
+            return true;
+
+        //alert("Preço de venda aceita somente números");
+        //return false;
+    }
+</script>

@@ -1,0 +1,101 @@
+﻿@model AplicativoWeb.Models.Pedido
+
+@{
+    ViewBag.Title = "Visualizar";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Inserir produtos</h2>
+
+<div>
+    <h4>Pedido</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Pessoa.Nome)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Pessoa.Nome)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Numero)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Numero)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Emissao)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Emissao)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Total)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Total)
+        </dd>
+
+    </dl>
+    <p>
+        @Html.ActionLink("Inserir item", "InserirItem", new { pedidoId = Model.Id })
+    </p>
+
+    <table class="table">
+
+        <tr>
+           
+            <th>
+                Codigo
+            </th>
+            <th>
+                Quantidade
+            </th>
+            <th>
+                Preço Unitario
+            </th>
+            <th>
+                Percentual de Desconto
+            </th>
+            <th>
+                Total
+            </th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model.ItensPedidos)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Produto.Codigo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantidade)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PrecoUnitario)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PercentualDesconto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Total)
+            </td>
+            <td>
+                @Html.ActionLink("Excluir", "ExcluirItem", new { id = item.Id })
+            </td>
+        </tr>
+}
+
+    </table>
+</div>
+<p>
+    @Html.ActionLink("Voltar para lista", "Index")
+</p>

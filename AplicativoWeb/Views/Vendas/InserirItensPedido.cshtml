@@ -1,0 +1,174 @@
+﻿@model AplicativoWeb.Models.ItemPedido
+
+@{
+    ViewBag.Title = "InserirItensPedido";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Itens do Pedido</h2>
+
+@using (Html.BeginForm("InserirItemPedido", null, FormMethod.Post, new { @id = "formItemPedido"}))
+{
+    @Html.AntiForgeryToken()
+    
+<div class="form-horizontal">
+    <h4>ItemPedido</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <div class="form-group">
+        @Html.LabelFor(model => model.ProdutoId, "Produto", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownList("ProdutoId", null, htmlAttributes: new { @class = "form-control", @onchange="BuscarPreco(this.value)" })
+            @Html.ValidationMessageFor(model => model.ProdutoId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    @Html.HiddenFor(model => model.PedidoId, "PedidoId")
+    @*<div class="form-group">
+            @Html.LabelFor(model => model.PedidoId, "PedidoId", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("PedidoId", null, htmlAttributes: new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.PedidoId, "", new { @class = "text-danger" })
+            </div>
+        </div>*@
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Quantidade, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Quantidade, new { htmlAttributes = new { @id="quantidade", @class = "form-control", @onchange="AlterarTotal()" } })
+            @Html.ValidationMessageFor(model => model.Quantidade, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.PrecoUnitario, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.PrecoUnitario, new { htmlAttributes = new { @readonly = "readonly", @id="precoUnitario", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.PrecoUnitario, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.PercentualDesconto, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.PercentualDesconto, new { htmlAttributes = new { @id="percentualDesconto", @class = "form-control", @onchange = "AlterarTotal()" } })
+            @Html.ValidationMessageFor(model => model.PercentualDesconto, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Total, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Total, new { htmlAttributes = new { @readonly = "readonly", @id="total", @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Total, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    @Html.HiddenFor(model => model.PedidoId, "PedidoId")
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="button" id="btnEnviar" value="Salvar item" class="btn btn-default" onclick="Salvar()"/>
+        </div>
+    </div>
+</div>
+}
+
+@*<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>*@
+
+
+<script type="text/javascript">
+    function BuscarPreco() {
+        $.ajax({
+            type: "GET",
+            url: "/Produto/BuscarPrecoProduto",
+            cache: false,
+            async: false,
+            data: { identificador: $("#ProdutoId").find(":selected").val() },
+            success: function (data) {
+                preco = data;
+                $("#precoUnitario").val(data);
+                $("#quantidade").val("1");
+                $("#percentualDesconto").val("0");
+            }
+        });
+
+        AlterarTotal();
+    }
+
+    function AlterarTotal() {
+        var desconto = 0;
+        if ($("#percentualDesconto").val() == "")
+            desconto = parseFloat($("#percentualDesconto").val());
+
+        var quantidade = parseFloat($("#quantidade").val());
+        var precoVenda = parseFloat($("#precoUnitario").val());
+        var totalLiquido = quantidade * precoVenda;
+        if (desconto > 0)
+            totalLiquido = totalLiquido * (1 - desconto / 100);
+        
+        totalLiquido = totalLiquido.toString().replace(".", ",");
+
+        $("#total").val(totalLiquido);
+    }
+
+    function Salvar() {
+        if (!VerificarPreenchimento())
+            return;
+
+        var pedidoId = '@ViewBag.PedidoId';
+        $("#PedidoId").val(pedidoId);
+
+        var preco = $("#precoUnitario").val();
+        preco = preco.replace(".", ",");
+        $("#precoUnitario").val(preco);
+
+        var quantidade = $("#quantidade").val();
+        quantidade = quantidade.replace(".", ",");
+        $("#quantidade").val(quantidade);
+
+        var desconto = $("#percentualDesconto").val();
+        desconto = desconto.replace(".", ",");
+        $("#percentualDesconto").val(desconto);
+
+        var total = $("#total").val();
+        total = total.replace(".", ",");
+        $("#total").val(total);
+
+        
+        $("#formItemPedido").submit();
+    }
+
+
+    function VerificarPreenchimento() {
+        if ($("#quantidade").val().trim() == "") {
+            alert("Campo quantidade não preenchido");
+            $("#nome").focus();
+            return false;
+        }
+        if ($("#percentualDesconto").val().trim() == "") {
+            alert("Campo percentual de desconto não preenchido, caso nao tenha, informe valor 0");
+            $("#nome").focus();
+            return false;
+        }
+        if ($("#percentualDesconto").val().trim() < 0) {
+            alert("Campo percentual de desconto não pode ser negativo");
+            $("#nome").focus();
+            return false;
+        }
+        return true;
+    }
+
+
+    //$(document).ready(function () {
+    //    $("#btnEnviar").click(function () {
+    //        $("#PedidoId").val(ViewBag.PedidoId);
+
+    //        $("#formItemPedido").submit();
+    //    });
+    //});
+
+    
+</script>

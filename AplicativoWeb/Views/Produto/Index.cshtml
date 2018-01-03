@@ -1,0 +1,106 @@
+﻿@model IEnumerable<AplicativoWeb.Models.Produto>
+
+@{
+    ViewBag.Title = "Produtos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Produtos</h2>
+<table class="table">
+    <tr>
+        <td>
+            @Html.TextBox("Pesquisa")
+        </td>
+        <td>
+            <select id="selecionarFiltroBuscaProduto" class="form-control">
+                <option value=0>  </option>
+                <option value=1> @Html.DisplayNameFor(model => model.Codigo) </option>
+                <option value=2> @Html.DisplayNameFor(model => model.Nome) </option>
+                <option value=3> @Html.DisplayNameFor(model => model.PrecoUnitario) </option>
+            </select>
+        </td>
+        <td>
+            <div class="form-group" id="botao">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="button" id="btnBuscar" value="Buscar" class="btn btn-default" onclick="BuscarProduto()" />
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<p>
+    @Html.ActionLink("Inserir Produto", "Inserir")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Codigo)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Nome)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PrecoUnitario)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Codigo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PrecoUnitario)
+            </td>
+            <td>
+                @Html.ActionLink("Editar", "Editar", new { id = item.Id }) |
+                @Html.ActionLink("Deletar", "Deletar", new { id = item.Id })
+            </td>
+        </tr>
+
+    }
+</table>
+
+<script type="text/javascript">
+    function BuscarProduto() {
+        var itemBusca = $("#selecionarFiltroBuscaProduto").find(":selected").val();
+        var url = "";
+        var parametro = new Array();
+
+        switch (itemBusca) {
+            case "1":
+                url = "Produto/BuscarProdutoPorCodigo";
+                parametro = { codigo: $("#Pesquisa").val() };
+                break;
+            case "2":
+                url = "Produto/BuscarProdutoPorNome";
+                parametro = { nome: $("#Pesquisa").val() };
+                break;
+            case "3":
+                url = "Produto/BuscarProdutoPorPreco";
+                parametro = { precoUnitario: $("#Pesquisa").val().replace(",", ".") };
+                break;
+            default:
+                url = "Produto/Index";
+        }
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            cache: false,
+            data: parametro,
+            success: function (data) {
+                $("#informacoes").html(data);
+            },
+            error: function (xhr, er, errorThrown) {
+                alert(xhr.responseText);
+            }
+        });
+    }
+</script>

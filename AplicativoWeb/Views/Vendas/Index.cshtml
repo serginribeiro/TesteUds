@@ -1,0 +1,117 @@
+﻿@model IEnumerable<AplicativoWeb.Models.Pedido>
+
+@{
+    ViewBag.Title = "Pedidos de Venda";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Pedidos de venda</h2>
+<table class="table">
+    <tr>
+        <td>
+            @Html.TextBox("Pesquisa")
+        </td>
+        <td>
+            <select id="selecionarFiltroBuscaPedido" class="form-control">
+                <option value=0>  </option>
+                <option value=1> @Html.DisplayNameFor(model => model.Pessoa.Nome) </option>
+                <option value=2> @Html.DisplayNameFor(model => model.Numero) </option>
+                <option value=3> @Html.DisplayNameFor(model => model.Emissao) </option>
+                <option value=4> @Html.DisplayNameFor(model => model.Total) </option>
+            </select>
+        </td>
+        <td>
+            <div class="form-group" id="botao">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="button" id="btnBuscar" value="Buscar" class="btn btn-default" onclick="BuscarPedidos()" />
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+<p>
+    @Html.ActionLink("Adicionar Pedido", "Inserir")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Pessoa.Nome)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Numero)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Emissao)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Total)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pessoa.Nome)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Numero)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Emissao)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Total)
+            </td>
+            <td>
+                @*@Html.ActionLink("Edit", "Edit", new { id=item.Id }) |*@
+                @Html.ActionLink("Detalhes", "Visualizar", new { id = item.Id }) |
+                @Html.ActionLink("Excluir", "Deletar", new { id = item.Id })
+            </td>
+        </tr>
+    }
+
+</table>
+
+<script type="text/javascript">
+    function BuscarPedidos() {
+        var itemBusca = $("#selecionarFiltroBuscaPedido").find(":selected").val();
+        var url = "";
+        var parametro = new Array();
+
+        switch (itemBusca) {
+            case "1":
+                url = "Vendas/BuscarPedidoPorNome";
+                parametro = { nome: $("#Pesquisa").val() };
+                break;
+            case "2":
+                url = "Vendas/BuscarPedidoPorNumero";
+                parametro = { numero: $("#Pesquisa").val() };
+                break;
+            case "3":
+                url = "Vendas/BuscarPedidoPorEmisssao";
+                parametro = { dataDeEmissao: $("#Pesquisa").val() };
+                break;
+            case "4":
+                url = "Vendas/BuscarPedidoPorTotal";
+                parametro = { total: $("#Pesquisa").val() };
+                break;
+            default:
+                url = "Vendas/Index";
+        }
+
+        $.ajax({
+            type: "GET",
+            url: url,
+            cache: false,
+            data: parametro,
+            success: function (data) {
+                $("#informacoes").html(data);
+            },
+            error: function (xhr, er, errorThrown) {
+                alert(xhr.responseText);
+            }
+        });
+    }
+</script>

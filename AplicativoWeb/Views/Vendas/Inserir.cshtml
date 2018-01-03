@@ -1,0 +1,72 @@
+﻿@model AplicativoWeb.Models.Pedido
+
+@{
+    ViewBag.Title = "Inserir";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Inserir</h2>
+
+@using (Html.BeginForm("InserirPedido", null, FormMethod.Post, htmlAttributes: new { @id = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Pedido</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.PessoaId, "Pessoa", htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownList("PessoaId", null, htmlAttributes: new { @id = "pessoaId", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.PessoaId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Emissao, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Emissao, new { htmlAttributes = new { @id = "emissao", @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Emissao, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Total, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*@Html.TextBoxFor(model => model.A, new { @readonly = "readonly" })*@
+                @Html.EditorFor(model => model.Total, new { htmlAttributes = new { @readonly = "readonly" , @id = "total", @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Total, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="button" value="Inserir Pedido Parcial" class="btn btn-default" onclick="Salvar()" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Voltar para a listagem", "Index")
+</div>
+
+<script type="text/javascript">
+    function Salvar() {
+        if (!VerificarPreenchimento())
+            return;
+
+        $("#form").submit();
+    }
+
+    function VerificarPreenchimento() {
+        if ($("#emissao").val().trim() == "") {
+            alert("Campo emissão não preenchido");
+            $("#nome").focus();
+            return false;
+        }
+        return true;
+    }
+
+</script>
